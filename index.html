@@ -139,6 +139,10 @@ canvas{display:block}
 .obj .chev{color:var(--mut);font-size:11px}
 .obj.min{display:inline-flex;padding:6px 10px}
 .obj.min #hud-obj{display:none}.obj.min .lbl{display:inline}.obj.min .chev{transform:rotate(180deg)}
+#btn-smoke{pointer-events:auto;position:fixed;right:16px;bottom:calc(22px + env(safe-area-inset-bottom));width:64px;height:64px;border-radius:50%;border:2px solid rgba(46,230,255,.5);background:rgba(12,16,24,.8);color:var(--txt);font-size:22px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1}
+#btn-smoke b{position:absolute;top:-4px;right:-4px;background:var(--cyan);color:#04121a;border-radius:50%;width:22px;height:22px;font-size:13px;display:flex;align-items:center;justify-content:center}
+#btn-smoke small{font-size:8px;font-weight:900;letter-spacing:.1em;margin-top:2px;color:var(--mut)}
+#btn-smoke.off{opacity:.3}
 @media (min-width:700px){.logo{font-size:64px}}
 </style>
 </head>
@@ -151,6 +155,7 @@ canvas{display:block}
     <div class="hud-r"><span id="hud-hp"></span><span class="coins" id="hud-coins">0</span><button id="btn-pause" aria-label="Pausa">❚❚</button></div>
   </div>
   <div class="obj" id="hud-objbox"><span class="lbl">MISIÓN</span><span id="hud-obj"></span><span id="hud-stealth" class="tag good">OCULTO</span><span class="chev">▴</span></div>
+  <button id="btn-smoke" aria-label="Bomba de humo">💨<b id="smoke-n">1</b><small>HUMO</small></button>
   <div id="hud-boss" class="boss-bar hidden"><div class="bt"><span>JEFE · <span id="hud-boss-name"></span></span><span id="hud-boss-hp"></span></div><div class="bar"><i id="hud-boss-fill"></i></div></div>
 </div>
 

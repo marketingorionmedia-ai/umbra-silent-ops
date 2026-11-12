@@ -385,14 +385,14 @@ function startLevel(L) {
   G = {
     L, lv, P, cols: lv.cols, rows: lv.rows, grid: lv.grid.slice(), zone: lv.zone, mission: lv.mission,
     t: 0, grace: 1.2,
-    player: { ...ctr(lv.start), r: 10, ang: -Math.PI / 2, hp: st.hpMax, inv: 0, walk: 0, swing: 0, swingAng: 0, starCd: 1.5, ...st },
+    player: { ...ctr(lv.start), r: 10, ang: -Math.PI / 2, hp: st.hpMax, inv: 0, walk: 0, swing: 0, swingAng: 0, starCd: 1.5, still: 0, camo: 1, hidden: false, smokeT: 0, ...st },
     guards: lv.guards.map(s => mkGuard(s, P)),
     cams: lv.cams.map(c => ({ ...ctr(c), base: c.base, ang: c.base, meter: 0, cool: 0, phase: Math.random() * 6 })),
     coins: lv.coins.map(c => ({ ...ctr(c), got: false })),
     intel: lv.intel.map(c => ({ ...ctr(c), got: false })),
     exit: ctr(lv.exit),
     bullets: [], parts: [], floaters: [], stars: [], slashes: [],
-    coinsGot: 0, bonus: 0, combo: 0, lastKill: -9, hitstop: 0, detected: false, over: false, endT: 0, shake: 0, cam: { x: 0, y: 0 }, banner: null,
+    smokes: 1, looked: false, coinsGot: 0, bonus: 0, combo: 0, lastKill: -9, hitstop: 0, detected: false, over: false, endT: 0, shake: 0, cam: { x: 0, y: 0 }, banner: null,
   };
   G.bg = buildBg(G);
   G.boss = G.guards.find(g => g.boss) || null;
@@ -483,6 +483,8 @@ function update(dt) {
     const v = moveVec();
     if (v.m) { moveCircle(p, v.x * p.spd * v.m * dt, v.y * p.spd * v.m * dt); p.ang = Math.atan2(v.y, v.x); p.walk += dt * 12 * v.m; }
     p.inv = Math.max(0, p.inv - dt); p.swing = Math.max(0, p.swing - dt);
+    p.still = v.m ? 0 : p.still + dt; p.smokeT = Math.max(0, p.smokeT - dt);
+    p.hidden = p.still >= 0.3 && p.camo > 0 && p.swing <= 0;
 
     for (const g of G.guards) {
       if (g.dead) continue;
@@ -516,8 +518,10 @@ function update(dt) {
     if (!needsExit() && objectivesDone()) finish(true);
   }
 
+  G.looked = false;
   for (const g of G.guards) updateGuard(g, dt);
   for (const c of G.cams) updateCam(c, dt);
+  if (p.hidden && G.looked) p.camo = Math.max(0, p.camo - dt / 2.5); else if (!G.looked) p.camo = Math.min(1, p.camo + dt / 4);
 
   for (const b of G.bullets) {
     b.x += b.vx * dt; b.y += b.vy * dt; b.life -= dt;
@@ -594,7 +598,9 @@ function updateGuard(g, dt) {
   if (g.dead) return;
   const p = G.player;
   g.lookT += dt; g.fireCd -= dt; g.bite -= dt; g.invT -= dt;
-  const seen = !G.over && G.grace <= 0 && canSee(g, p);
+  const raw = !G.over && G.grace <= 0 && p.smokeT <= 0 && canSee(g, p);
+  if (raw) G.looked = true;
+  const seen = raw && !(p.hidden && g.state !== 'alert');
   g.seesPlayer = seen;
   const d = Math.hypot(p.x - g.x, p.y - g.y);
   if (seen) {
@@ -635,7 +641,7 @@ function updateGuard(g, dt) {
       break;
     }
     case 'alert': {
-      const visible = seen || (d < g.range && !G.over && los(g, p));
+      const visible = seen || (p.smokeT <= 0 && d < g.range && !G.over && los(g, p));
       if (g.chargeT > 0) { // embestida de jefe
         g.chargeT -= dt;
         moveCircle(g, Math.cos(g.chargeDir) * 280 * dt, Math.sin(g.chargeDir) * 280 * dt);
@@ -692,7 +698,9 @@ function updateCam(c, dt) {
   c.ang = c.base + Math.sin(c.phase) * 0.85;
   c.range = G.P.range * 1.1; c.fov = 50 * Math.PI / 180;
   const p = G.player;
-  const seen = c.cool <= 0 && !G.over && G.grace <= 0 && canSee(c, p);
+  const rawC = c.cool <= 0 && !G.over && G.grace <= 0 && p.smokeT <= 0 && canSee(c, p);
+  if (rawC) G.looked = true;
+  const seen = rawC && !p.hidden;
   if (seen) c.meter = Math.min(1, c.meter + dt / (G.P.detTime * 0.9) * p.det);
   else c.meter = Math.max(0, c.meter - dt * 0.5);
   if (c.meter >= 1) {
@@ -755,6 +763,13 @@ function bossEscape(g) {
     }
     G.banner = { txt: 'REFUERZOS', sub: '', life: 1.2 };
   }
+}
+function useSmoke() {
+  if (!G || !running || paused || G.over || G.smokes <= 0) return;
+  const p = G.player; G.smokes--; p.smokeT = 3; SFX.smoke(); vibe(30);
+  for (let i = 0; i < 40; i++) G.parts.push({ x: p.x + (Math.random() - 0.5) * 30, y: p.y + (Math.random() - 0.5) * 30, vx: (Math.random() - 0.5) * 90, vy: (Math.random() - 0.5) * 90, life: 1.2 + Math.random() * 0.8, c: 'rgba(190,200,215,0.3)', s: 12, grow: 34 });
+  for (const g of G.guards) if (!g.dead && g.state === 'alert') { g.state = 'search'; g.searchT = 3; g.meter = 0.3; g.path = null; g.burstLeft = 0; g.windT = 0; g.chargeT = 0; floater(g.x, g.y - 30, '?', '#ffd23a'); }
+  floater(p.x, p.y - 30, 'HUMO', '#cfd8e3'); updateHUD();
 }
 function hurt(n) {
   const p = G.player; if (p.inv > 0 || G.over) return;
@@ -1331,6 +1346,11 @@ function drawPlayer() {
   // flecha de dirección
   ctx.save(); ctx.rotate(p.ang); ctx.fillStyle = ch.band; ctx.globalAlpha = 0.8;
   ctx.beginPath(); ctx.moveTo(p.r + 7, 0); ctx.lineTo(p.r + 2, -3.5); ctx.lineTo(p.r + 2, 3.5); ctx.closePath(); ctx.fill(); ctx.restore(); ctx.globalAlpha = 1;
+  if (p.hidden || p.smokeT > 0) {
+    ctx.strokeStyle = 'rgba(46,230,255,0.5)'; ctx.lineWidth = 1.5; ctx.setLineDash([3, 4]); ctx.beginPath(); ctx.arc(0, -4, 22, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+  }
+  if (p.camo < 1) { ctx.strokeStyle = 'rgba(0,0,0,0.5)'; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(0, -4, 26, -2.2, -0.94); ctx.stroke(); ctx.strokeStyle = p.camo > 0.3 ? '#2ee6ff' : '#ff3b4e'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(0, -4, 26, -2.2, -2.2 + 1.26 * p.camo); ctx.stroke(); }
+  if (p.hidden || p.smokeT > 0) ctx.globalAlpha = 0.4;
   ctx.scale(1.25, 1.25);
   // piernas
   ctx.fillStyle = shade(ch.body, 0.75); ctx.strokeStyle = '#05070a'; ctx.lineWidth = 1;
@@ -1375,8 +1395,9 @@ const MISSION_TEXT = {
 };
 const TIPS = {
   1: 'Arrastra el dedo en cualquier parte para moverte. Acércate a un guardia por la espalda para eliminarlo. Cuando no quede ninguno, ve a la SALIDA.',
-  2: 'Evita los conos de luz. Si se ponen amarillos, te están viendo: ¡sal rápido!',
-  3: 'Las cajas bloquean la visión. Úsalas para esconderte.',
+  2: 'CAMUFLAJE: si te quedas quieto te vuelves casi invisible y los guardias no te ven. Ojo: si te miran, la barra azul se gasta; cuando se acaba, te descubren.',
+  3: 'BOMBA DE HUMO: tienes una por misión (botón abajo a la derecha). Si te descubren, úsala: te pierden de vista 3 segundos.',
+  4: 'Las cajas bloquean la visión. Úsalas para esconderte.',
 };
 const MISSION_TIPS = {
   target: 'Los objetivos tienen un círculo dorado. Elimínalos y llega a la SALIDA.',
@@ -1427,6 +1448,7 @@ function updateHUD() {
   $('#hud-coins').textContent = G.coinsGot * 5 + G.bonus;
   $('#hud-stealth').className = G.detected ? 'tag bad' : 'tag good';
   $('#hud-stealth').textContent = G.detected ? 'DETECTADO' : 'OCULTO';
+  $('#smoke-n').textContent = G.smokes; $('#btn-smoke').classList.toggle('off', G.smokes <= 0);
   const bb = $('#hud-boss');
   if (G.boss) {
     bb.classList.remove('hidden');
@@ -1666,6 +1688,8 @@ function bind() {
   $('#btn-play').onclick = play;
   $('#btn-brief-back').onclick = () => { G = null; renderLevels(); show('levels'); };
   $('#btn-pause').onclick = togglePause;
+  $('#btn-smoke').onclick = useSmoke;
+  window.addEventListener('keydown', e => { if (e.key === ' ') useSmoke(); });
   $('#hud-objbox').classList.toggle('min', !!save.objMin);
   $('#hud-objbox').onclick = () => { save.objMin = !save.objMin; persist(); $('#hud-objbox').classList.toggle('min', save.objMin); };
   $('#btn-resume').onclick = togglePause;
