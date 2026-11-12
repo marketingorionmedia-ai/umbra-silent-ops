@@ -470,7 +470,11 @@ function strikeOK(g, fx, fy, d) {
 function strike(g, fromX, fromY, ranged) {
   const p = G.player;
   if (!ranged) { p.swing = 0.22; p.swingAng = Math.atan2(g.y - p.y, g.x - p.x); }
-  G.slashes.push({ x: g.x, y: g.y, a: Math.atan2(g.y - fromY, g.x - fromX), life: 0.25 });
+  const wid = ranged ? 'star' : save.weapon;
+  const SL = { nodachi: ['255,60,85', 30, 2.2], kusarigama: ['190,200,215', 22, 1.2], tanto: ['160,240,255', 13, 1] }[wid] || ['255,255,255', 17, 1];
+  G.slashes.push({ x: g.x, y: g.y, a: Math.atan2(g.y - fromY, g.x - fromX), life: 0.25, c: SL[0], r: SL[1], w: SL[2] });
+  if (wid === 'tanto') G.slashes.push({ x: g.x, y: g.y, a: Math.atan2(g.y - fromY, g.x - fromX) + 1.6, life: 0.25, c: SL[0], r: SL[1], w: 1 });
+  if (wid === 'nodachi') { G.shake = Math.max(G.shake, 8); burst(g.x, g.y, 16, ['#ff3b4e', '#ff8a9a', '#ffd23a'], 300); G.hitstop = 0.1; }
   if (g.boss) hitBoss(g, ranged ? 1 : p.bossDmg);
   else killGuard(g);
 }
@@ -806,7 +810,20 @@ function weaponShape(x, w, s) {
     for (let i = 1; i < 5; i++) { const hx = -len * 0.39 - hilt * i / 5; x.beginPath(); x.moveTo(hx - wid * 0.3, -wid * 0.7); x.lineTo(hx + wid * 0.3, wid * 0.7); x.stroke(); }
   };
   if (w.id === 'katana') blade(s * 1.5, s * 0.12, s * 0.42, '#20242c');
-  else if (w.id === 'nodachi') blade(s * 1.85, s * 0.16, s * 0.5, '#8f1d2a');
+  else if (w.id === 'nodachi') {
+    // espada gigante: hoja ancha carmesí con filo brillante
+    const L = s * 2.3, Wd = s * 0.34, x0 = -L * 0.3;
+    x.shadowColor = '#ff2a44'; x.shadowBlur = s * 0.5;
+    x.fillStyle = '#8f1326'; x.beginPath(); x.moveTo(x0, -Wd / 2); x.lineTo(L * 0.52, -Wd / 2); x.lineTo(L * 0.7, Wd * 0.35); x.lineTo(L * 0.5, Wd / 2); x.lineTo(x0, Wd / 2); x.closePath(); x.fill();
+    x.shadowBlur = 0;
+    x.fillStyle = '#ff5468'; x.beginPath(); x.moveTo(x0, Wd * 0.12); x.lineTo(L * 0.66, Wd * 0.3); x.lineTo(L * 0.5, Wd / 2); x.lineTo(x0, Wd / 2); x.closePath(); x.fill();
+    x.fillStyle = 'rgba(255,255,255,0.75)'; x.fillRect(x0, Wd / 2 - s * 0.05, L * 0.8, s * 0.04);
+    x.fillStyle = '#3a0812'; for (let i = 0; i < 3; i++) { x.beginPath(); x.arc(x0 + L * (0.14 + i * 0.14), -Wd * 0.12, s * 0.045, 0, 7); x.fill(); }
+    x.fillStyle = '#ffd23a'; rr(x, x0 - s * 0.09, -Wd * 0.95, s * 0.14, Wd * 1.9, s * 0.05); x.fill();
+    x.fillStyle = '#20242c'; rr(x, x0 - s * 0.7, -s * 0.09, s * 0.62, s * 0.18, s * 0.07); x.fill();
+    x.fillStyle = '#ff3b4e'; for (let i = 0; i < 4; i++) x.fillRect(x0 - s * 0.62 + i * s * 0.15, -s * 0.09, s * 0.05, s * 0.18);
+    x.fillStyle = '#ffd23a'; x.beginPath(); x.arc(x0 - s * 0.74, 0, s * 0.1, 0, 7); x.fill();
+  }
   else if (w.id === 'tanto') {
     x.save(); x.rotate(-0.35); x.translate(0, -s * 0.12); blade(s * 0.9, s * 0.12, s * 0.3, '#20242c'); x.restore();
     x.save(); x.rotate(0.35); x.translate(0, s * 0.12); blade(s * 0.9, s * 0.12, s * 0.3, '#20242c'); x.restore();
@@ -1207,8 +1224,11 @@ function draw() {
   for (const s of G.stars) { ctx.fillStyle = '#d7e0ea'; starShape(ctx, s.x, s.y, 6, s.rot); ctx.fill(); }
   for (const s of G.slashes) {
     const k = s.life / 0.25;
-    ctx.strokeStyle = `rgba(255,255,255,${k})`; ctx.lineWidth = 3 * k + 1;
-    ctx.beginPath(); ctx.arc(s.x - Math.cos(s.a) * 6, s.y - Math.sin(s.a) * 6, 16, s.a - 1.6 + (1 - k), s.a + 0.4 + (1 - k)); ctx.stroke();
+    const c = s.c || '255,255,255', r = s.r || 16, w = s.w || 1;
+    if (w > 1.5) { ctx.strokeStyle = `rgba(${c},${k * 0.35})`; ctx.lineWidth = (3 * k + 1) * w * 2.2; ctx.beginPath(); ctx.arc(s.x - Math.cos(s.a) * 6, s.y - Math.sin(s.a) * 6, r, s.a - 1.9 + (1 - k), s.a + 0.7 + (1 - k)); ctx.stroke(); }
+    ctx.strokeStyle = `rgba(${c},${k})`; ctx.lineWidth = (3 * k + 1) * w; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.arc(s.x - Math.cos(s.a) * 6, s.y - Math.sin(s.a) * 6, r, s.a - 1.6 + (1 - k), s.a + 0.4 + (1 - k)); ctx.stroke();
+    if (w > 1.5) { ctx.strokeStyle = `rgba(255,255,255,${k})`; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(s.x - Math.cos(s.a) * 6, s.y - Math.sin(s.a) * 6, r, s.a - 1.4 + (1 - k), s.a + 0.2 + (1 - k)); ctx.stroke(); }
   }
   for (const q of G.parts) { ctx.globalAlpha = clamp(q.life * 3, 0, 1); ctx.fillStyle = q.c; if (q.grow) { ctx.beginPath(); ctx.arc(q.x, q.y, q.s, 0, 7); ctx.fill(); } else ctx.fillRect(q.x - q.s / 2, q.y - q.s / 2, q.s, q.s); }
   ctx.globalAlpha = 1;
@@ -1361,10 +1381,15 @@ function drawPlayer() {
   ctx.save(); ctx.translate(0, -7 - bob); ctx.scale(p.face, 1);
   drawPortrait(ctx, ch, wp, 0, 0, 10.5, true);
   ctx.restore();
+  // arma en la mano
+  if (p.swing <= 0 && wp.id !== 'shuriken') {
+    const big = wp.id === 'nodachi', hs = big ? 0.56 : 0.4;
+    ctx.save(); ctx.translate(p.face * 8.5, 1 - bob); ctx.scale(p.face, 1); ctx.rotate(-1.15 + Math.sin(G.t * 2.5) * 0.05); ctx.scale(hs, hs); ctx.translate(big ? 14 : 10, 0); weaponShape(ctx, wp, 26); ctx.restore();
+  }
   // golpe
   if (p.swing > 0) {
     const k = 1 - p.swing / 0.22;
-    ctx.save(); ctx.rotate(p.swingAng - 1.3 + k * 2.6); ctx.translate(16, 0); ctx.scale(0.42, 0.42); weaponShape(ctx, wp, 26); ctx.restore();
+    ctx.save(); ctx.rotate(p.swingAng - 1.3 + k * 2.6); ctx.translate(wp.id === 'nodachi' ? 20 : 16, 0); const ws = wp.id === 'nodachi' ? 0.6 : 0.42; ctx.scale(ws, ws); weaponShape(ctx, wp, 26); ctx.restore();
   }
   ctx.restore();
 }
