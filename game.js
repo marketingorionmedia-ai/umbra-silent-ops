@@ -1546,7 +1546,7 @@ function openBrief(L) {
     b.insertAdjacentHTML('beforeend', own ? `<i>${eq ? '✓ EN USO' : w.name.split(' ')[0]}</i>` : `<i class="coins">${w.price}</i>`);
     b.onclick = () => {
       if (eq) return;
-      if (!own) { if (save.coins < w.price) return; save.coins -= w.price; save.weapons.push(w.id); SFX.pick(); vibe(20); }
+      if (!own) { buy(w.price, () => { save.weapons.push(w.id); save.weapon = w.id; }, weaponInfo(w), () => openBrief(L)); return; }
       save.weapon = w.id; persist(); openBrief(L);
     };
     wr.appendChild(b);
@@ -1623,7 +1623,30 @@ function renderLevels() {
 }
 
 let shopTab = 'chars';
-function buy(price, fn) { if (save.coins < price) return; save.coins -= price; fn(); persist(); SFX.pick(); vibe(20); renderShop(); }
+function buy(price, fn, info, after) {
+  const ok = save.coins >= price;
+  const x = prepCanvas($('#cf-c'), 180, 130); x.clearRect(0, 0, 180, 130); info.draw(x);
+  $('#cf-title').textContent = info.title; $('#cf-sub').textContent = info.sub || '';
+  $('#cf-lines').innerHTML = info.lines.filter(Boolean).map(l => `<li>${l}</li>`).join('');
+  $('#cf-price').textContent = price;
+  $('#cf-after').innerHTML = ok ? `Tienes <b>${save.coins}</b> · te quedarán <b>${save.coins - price}</b>` : `<span style="color:var(--red)">Te faltan ${price - save.coins} monedas</span>`;
+  $('#cf-yes').disabled = !ok; $('#cf-yes').textContent = info.cta || 'COMPRAR';
+  $('#cf-no').onclick = () => $('#confirm').classList.add('hidden');
+  $('#cf-yes').onclick = () => {
+    if (save.coins < price) return;
+    save.coins -= price; fn(); persist(); SFX.win(); vibe([20, 30, 40]);
+    $('#confirm').classList.add('hidden'); (after || renderShop)();
+  };
+  $('#confirm').classList.remove('hidden');
+}
+const charInfo = c => ({ title: c.name, sub: c.role, draw: x => drawPortrait(x, c, weaponOf(), 90, 50, 36),
+  lines: [c.perk, `Corazones: ${3 + (c.hp || 0)}`, c.spd ? `Velocidad: +${Math.round(c.spd * 100)}%` : 'Velocidad: normal', c.det ? `Sigilo: te detectan ${Math.round((1 - c.det) * 100)}% más lento` : null, c.coin ? `Monedas: +${Math.round(c.coin * 100)}% en cada misión` : null, 'Se puede mejorar hasta el nivel 5'] });
+const weaponInfo = w => ({ title: w.name, sub: 'Arma', draw: x => { x.translate(90, 68); x.rotate(-0.35); weaponShape(x, w, w.id === 'nodachi' ? 34 : 44); },
+  lines: [w.desc, `Alcance de golpe: ${!w.reach ? 'normal' : w.reach > 12 ? 'máximo' : 'amplio'}`, w.spd ? `Velocidad: +${Math.round(w.spd * 100)}%` : null, w.pierce ? 'Elimina de frente a los enemigos blindados' : null, w.bossDmg ? `Quita ${w.bossDmg} vidas a los jefes por golpe` : null, w.ranged ? 'Lanza una estrella cada 4.5 s al enemigo desprevenido más cercano' : null, 'Sirve con todos tus héroes'] });
+const clvInfo = (c, l) => ({ title: `${c.name} · NIVEL ${l + 1}`, sub: `Mejora de héroe (${l} → ${l + 1} de ${MAX_CLV})`, cta: 'MEJORAR', draw: x => drawPortrait(x, c, weaponOf(), 90, 50, 36),
+  lines: [(l + 1 === 3 || l + 1 === 5) ? '+1 corazón extra' : null, '+4% de velocidad', 'Te detectan 4% más lento', '+1 de alcance de golpe', 'Solo aplica a este héroe'] });
+const upgInfo = (k, u, lvl) => ({ title: u.name, sub: `Mejora general (nivel ${lvl + 1} de ${u.prices.length})`, cta: 'MEJORAR', draw: x => { x.font = '900 64px system-ui'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillStyle = k === 'hp' ? '#ff3b4e' : '#2ee6ff'; x.fillText(k === 'hp' ? '♥' : k === 'spd' ? '»' : '◎', 90, 68); },
+  lines: [u.desc, 'Aplica a todos tus héroes'] });
 function renderShop() {
   $('#shop-coins').textContent = save.coins;
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.tab === shopTab));
@@ -1640,12 +1663,12 @@ function renderShop() {
       const b = document.createElement('button'); b.className = 'btn small' + (eq ? ' ghost' : '');
       if (eq) { b.textContent = 'EN USO'; b.disabled = true; }
       else if (own) { b.textContent = 'USAR'; b.onclick = () => { save.char = c.id; persist(); renderShop(); }; }
-      else { b.innerHTML = `<span class="coins dark">${c.price}</span>`; b.disabled = save.coins < c.price; b.onclick = () => buy(c.price, () => { save.chars.push(c.id); save.char = c.id; }); }
+      else { b.innerHTML = `<span class="coins dark">${c.price}</span>`; b.onclick = () => buy(c.price, () => { save.chars.push(c.id); save.char = c.id; }, charInfo(c)); }
       d.appendChild(b);
       if (own) {
         const l = clvOf(c.id), u = document.createElement('button'); u.className = 'btn small up';
         if (l >= MAX_CLV) { u.textContent = 'NIVEL MÁXIMO'; u.disabled = true; }
-        else { const cost = clvCost(c); u.innerHTML = `▲ NV ${l + 1} · <span class="coins dark">${cost}</span><small>${clvNext(l)}</small>`; u.disabled = save.coins < cost; u.onclick = () => buy(cost, () => { save.clv[c.id] = l + 1; }); }
+        else { const cost = clvCost(c); u.innerHTML = `▲ NV ${l + 1} · <span class="coins dark">${cost}</span><small>${clvNext(l)}</small>`; u.onclick = () => buy(cost, () => { save.clv[c.id] = l + 1; }, clvInfo(c, l)); }
         d.appendChild(u);
       }
       grid.appendChild(d);
@@ -1661,7 +1684,7 @@ function renderShop() {
       const b = document.createElement('button'); b.className = 'btn small' + (eq ? ' ghost' : '');
       if (eq) { b.textContent = 'EN USO'; b.disabled = true; }
       else if (own) { b.textContent = 'USAR'; b.onclick = () => { save.weapon = w.id; persist(); renderShop(); }; }
-      else { b.innerHTML = `<span class="coins dark">${w.price}</span>`; b.disabled = save.coins < w.price; b.onclick = () => buy(w.price, () => { save.weapons.push(w.id); save.weapon = w.id; }); }
+      else { b.innerHTML = `<span class="coins dark">${w.price}</span>`; b.onclick = () => buy(w.price, () => { save.weapons.push(w.id); save.weapon = w.id; }, weaponInfo(w)); }
       d.appendChild(cvs); d.appendChild(info); d.appendChild(b); box.appendChild(d);
     }
   } else {
@@ -1671,7 +1694,7 @@ function renderShop() {
       d.innerHTML = `<div class="grow"><b>${u.name}</b><small>${u.desc}</small><span class="pips">${'■'.repeat(lvl)}${'□'.repeat(max - lvl)}</span></div>`;
       const b = document.createElement('button'); b.className = 'btn small';
       if (lvl >= max) { b.textContent = 'MÁX'; b.disabled = true; }
-      else { b.innerHTML = `<span class="coins dark">${price}</span>`; b.disabled = save.coins < price; b.onclick = () => buy(price, () => { save.upg[k]++; }); }
+      else { b.innerHTML = `<span class="coins dark">${price}</span>`; b.onclick = () => buy(price, () => { save.upg[k]++; }, upgInfo(k, u, lvl)); }
       d.appendChild(b); box.appendChild(d);
     }
   }

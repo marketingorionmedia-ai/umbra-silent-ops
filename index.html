@@ -143,6 +143,16 @@ canvas{display:block}
 #btn-smoke b{position:absolute;top:-4px;right:-4px;background:var(--cyan);color:#04121a;border-radius:50%;width:22px;height:22px;font-size:13px;display:flex;align-items:center;justify-content:center}
 #btn-smoke small{font-size:8px;font-weight:900;letter-spacing:.1em;margin-top:2px;color:var(--mut)}
 #btn-smoke.off{opacity:.3}
+.modal{position:fixed;inset:0;z-index:20;background:rgba(4,6,10,.82);display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.modal .card{animation:pop .18s ease-out}
+@keyframes pop{from{transform:scale(.92);opacity:0}}
+#cf-title{text-align:center;font-weight:900;font-size:22px;letter-spacing:.12em}
+#cf-sub{text-align:center;color:var(--cyan);font-size:11px;letter-spacing:.2em;font-weight:800;text-transform:uppercase;margin:4px 0 10px}
+#cf-lines{margin:0 0 12px;padding:12px 14px 12px 30px;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:12px;font-size:14px;line-height:1.55}
+#cf-lines li:first-child{font-weight:700}
+.cf-price{display:flex;justify-content:space-between;align-items:center;font-weight:900;letter-spacing:.14em;font-size:13px;padding:0 4px}
+.cf-price .coins{font-size:20px;letter-spacing:0}
+#cf-after{text-align:right;color:var(--mut);font-size:12px;padding:2px 4px 6px}#cf-after b{color:var(--txt)}
 @media (min-width:700px){.logo{font-size:64px}}
 </style>
 </head>
@@ -254,6 +264,18 @@ canvas{display:block}
       </ol>
     </div>
     <button class="btn" data-back>ENTENDIDO</button>
+  </div>
+</div>
+
+<div id="confirm" class="modal hidden">
+  <div class="card">
+    <canvas id="cf-c" style="margin:0 auto"></canvas>
+    <div id="cf-title"></div>
+    <div id="cf-sub"></div>
+    <ul id="cf-lines"></ul>
+    <div class="cf-price"><span>PRECIO</span><span class="coins" id="cf-price">0</span></div>
+    <div id="cf-after"></div>
+    <div class="row"><button class="btn ghost" id="cf-no">CANCELAR</button><button class="btn" id="cf-yes">COMPRAR</button></div>
   </div>
 </div>
 
