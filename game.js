@@ -49,21 +49,21 @@ const BOSSES = [
 
 /* ---------- Personajes y armas ---------- */
 const CHARS = [
-  { id: 'kaze',    name: 'KAZE',     role: 'Ninja',        perk: 'Equilibrado',                        price: 0,    body: '#1d2029', band: '#2ee6ff', head: 'hood' },
-  { id: 'akane',   name: 'AKANE',    role: 'Kunoichi',     perk: '+12% velocidad',                     price: 400,  body: '#3a1420', band: '#ff3b4e', head: 'pony', spd: 0.12 },
-  { id: 'tetsu',   name: 'TETSU',    role: 'Samurái',      perk: '+1 corazón',                         price: 900,  body: '#5a1f1f', band: '#ffcf3a', head: 'kabuto', hp: 1 },
-  { id: 'nueve',   name: 'AGENTE 9', role: 'Espía',        perk: '+30% monedas en cada misión',        price: 1300, body: '#1c2230', band: '#ff3b4e', head: 'suit', coin: 0.3 },
-  { id: 'yoru',    name: 'YORU',     role: 'Sombra',       perk: 'Te detectan 25% más lento',          price: 1800, body: '#221a33', band: '#a46bff', head: 'cloak', det: 0.75 },
-  { id: 'kitsune', name: 'KITSUNE',  role: 'Máscara zorro', perk: '+10% velocidad · más sigilo',       price: 2400, body: '#2a1c1c', band: '#ff6b3a', head: 'fox', spd: 0.1, det: 0.85 },
-  { id: 'raiden',  name: 'RAIDEN',   role: 'Ciber-ninja',  perk: '+1 corazón · +8% velocidad',         price: 3200, body: '#1f3238', band: '#37f59a', head: 'visor', hp: 1, spd: 0.08 },
-  { id: 'oni',     name: 'ONI',      role: 'Leyenda',      perk: '+1 corazón · +10% vel. · más sigilo', price: 4500, body: '#1c0d0d', band: '#ff8a2e', head: 'oni', hp: 1, spd: 0.1, det: 0.8 },
+  { id: 'kaze',    name: 'KAZE',     role: 'Ninja',        perk: 'PASO SOMBRA: tras cada eliminación eres invisible 1.5 s',            price: 0,    body: '#1d2029', band: '#2ee6ff', head: 'hood', ab: 'shadow' },
+  { id: 'akane',   name: 'AKANE',    role: 'Kunoichi',     perk: 'DOBLE HUMO: 2 bombas de humo por misión · +12% velocidad',           price: 400,  body: '#3a1420', band: '#ff3b4e', head: 'pony', spd: 0.12, ab: 'smoke2' },
+  { id: 'tetsu',   name: 'TETSU',    role: 'Samurái',      perk: 'ARMADURA: bloquea el primer golpe de cada misión · +1 corazón',      price: 900,  body: '#5a1f1f', band: '#ffcf3a', head: 'kabuto', hp: 1, ab: 'armor' },
+  { id: 'nueve',   name: 'AGENTE 9', role: 'Espía',        perk: 'IMÁN: atrae las monedas cercanas · +30% monedas',                    price: 1300, body: '#1c2230', band: '#ff3b4e', head: 'suit', coin: 0.3, ab: 'magnet' },
+  { id: 'yoru',    name: 'YORU',     role: 'Sombra',       perk: 'CAMUFLAJE TOTAL: se esconde al instante y dura más del doble',       price: 1800, body: '#221a33', band: '#a46bff', head: 'cloak', det: 0.75, ab: 'deepcamo' },
+  { id: 'kitsune', name: 'KITSUNE',  role: 'Máscara zorro', perk: 'ILUSIÓN: la primera vez que te descubren, desapareces · +10% vel.', price: 2400, body: '#2a1c1c', band: '#ff6b3a', head: 'fox', spd: 0.1, det: 0.85, ab: 'trick' },
+  { id: 'raiden',  name: 'RAIDEN',   role: 'Ciber-ninja',  perk: 'PULSO EMP: las cámaras no te detectan · +1 corazón · +8% vel.',      price: 3200, body: '#1f3238', band: '#37f59a', head: 'visor', hp: 1, spd: 0.08, ab: 'emp' },
+  { id: 'oni',     name: 'ONI',      role: 'Leyenda',      perk: 'FURIA: elimina de frente a cualquier enemigo normal · +1 corazón',   price: 4500, body: '#1c0d0d', band: '#ff8a2e', head: 'oni', hp: 1, spd: 0.1, det: 0.8, ab: 'fury' },
 ];
 const WEAPONS = [
   { id: 'katana',     name: 'Katana',      desc: 'Equilibrada',                                   price: 0,    color: '#d7e0ea' },
   { id: 'tanto',      name: 'Tantō doble', desc: 'Ligeras: +8% velocidad',                        price: 300,  color: '#e6eef7', spd: 0.08 },
-  { id: 'kusarigama', name: 'Kusarigama',  desc: 'Cadena: golpeas desde mucho más lejos',          price: 700,  color: '#b9c2cc', reach: 10 },
+  { id: 'kusarigama', name: 'Kusarigama',  desc: 'Cadena: el mayor alcance de todas',               price: 700,  color: '#b9c2cc', reach: 18 },
   { id: 'shuriken',   name: 'Shurikens',   desc: 'Lanza estrellas a enemigos desprevenidos',       price: 1200, color: '#9aa6b5', ranged: true },
-  { id: 'nodachi',    name: 'Nodachi',     desc: 'Atraviesa armaduras · 2 de daño a jefes',        price: 2200, color: '#ff6b6b', reach: 5, pierce: true, bossDmg: 2 },
+  { id: 'nodachi',    name: 'Nodachi',     desc: 'Corte amplio · atraviesa armaduras · 2 de daño a jefes', price: 2200, color: '#ff6b6b', reach: 11, pierce: true, bossDmg: 2 },
 ];
 const UPGRADES = {
   hp:    { name: 'Vida extra', desc: '+1 corazón', prices: [250, 700] },
@@ -376,7 +376,7 @@ function playerStats() {
     hpMax: 3 + save.upg.hp + (c.hp || 0) + (lv >= 3 ? 1 : 0) + (lv >= 5 ? 1 : 0),
     spd: 118 * (1 + 0.08 * save.upg.spd + (c.spd || 0) + (w.spd || 0) + 0.04 * (lv - 1)),
     reach: 14 + save.upg.reach * 4 + (w.reach || 0) + (lv - 1),
-    det: (c.det || 1) * (1 - 0.04 * (lv - 1)), coin: c.coin || 0, pierce: !!w.pierce, bossDmg: w.bossDmg || 1, ranged: !!w.ranged,
+    det: (c.det || 1) * (1 - 0.04 * (lv - 1)), ab: c.ab || '', coin: c.coin || 0, pierce: !!w.pierce, bossDmg: w.bossDmg || 1, ranged: !!w.ranged,
   };
 }
 
@@ -394,6 +394,7 @@ function startLevel(L) {
     bullets: [], parts: [], floaters: [], stars: [], slashes: [],
     smokes: 1, looked: false, coinsGot: 0, bonus: 0, combo: 0, lastKill: -9, hitstop: 0, detected: false, over: false, endT: 0, shake: 0, cam: { x: 0, y: 0 }, banner: null,
   };
+  G.smokes = G.player.ab === 'smoke2' ? 2 : 1; G.player.shield = G.player.ab === 'armor' ? 1 : 0;
   G.bg = buildBg(G);
   G.boss = G.guards.find(g => g.boss) || null;
   if (G.boss) G.banner = { txt: G.boss.boss.name, sub: G.boss.boss.title, life: 2.6 };
@@ -460,6 +461,7 @@ function moveVec() {
 // ¿Se puede golpear al enemigo g desde (fx,fy)? d = distancia (Infinity para proyectiles)
 function strikeOK(g, fx, fy, d) {
   const p = G.player;
+  if (p.ab === 'fury' && !g.boss) return true;
   const diff = Math.abs(angDiff(g.ang, Math.atan2(fy - g.y, fx - g.x)));
   const behind = diff > 1.9;
   if (g.boss) return g.invT <= 0 && (behind || (!g.seesPlayer && g.state !== 'alert'));
@@ -488,7 +490,7 @@ function update(dt) {
     if (v.m) { moveCircle(p, v.x * p.spd * v.m * dt, v.y * p.spd * v.m * dt); p.ang = Math.atan2(v.y, v.x); p.walk += dt * 12 * v.m; }
     p.inv = Math.max(0, p.inv - dt); p.swing = Math.max(0, p.swing - dt);
     p.still = v.m ? 0 : p.still + dt; p.smokeT = Math.max(0, p.smokeT - dt);
-    p.hidden = p.still >= 0.3 && p.camo > 0 && p.swing <= 0;
+    p.hidden = p.still >= (p.ab === 'deepcamo' ? 0.05 : 0.3) && p.camo > 0 && p.swing <= 0;
 
     for (const g of G.guards) {
       if (g.dead) continue;
@@ -515,6 +517,7 @@ function update(dt) {
       }
     }
 
+    if (p.ab === 'magnet') for (const c of G.coins) { const d = Math.hypot(c.x - p.x, c.y - p.y); if (!c.got && d < 95 && d > 1 && los(p, c)) { c.x += (p.x - c.x) / d * 240 * dt; c.y += (p.y - c.y) / d * 240 * dt; } }
     for (const c of G.coins) if (!c.got && Math.hypot(c.x - p.x, c.y - p.y) < 18) { c.got = true; G.coinsGot++; SFX.coin(); floater(c.x, c.y, '+5', '#ffd23a'); updateHUD(); }
     for (const c of G.intel) if (!c.got && Math.hypot(c.x - p.x, c.y - p.y) < 20) { c.got = true; SFX.pick(); vibe(30); floater(c.x, c.y, 'INTEL', '#2ee6ff'); updateHUD(); }
     if (!G.objAnnounced && G.mission !== 'ghost' && objectivesDone()) { G.objAnnounced = true; if (!G.boss) { G.banner = { txt: 'SALIDA ABIERTA', sub: 'Escapa para completar la misión', life: 1.8 }; SFX.pick(); } updateHUD(); }
@@ -525,7 +528,7 @@ function update(dt) {
   G.looked = false;
   for (const g of G.guards) updateGuard(g, dt);
   for (const c of G.cams) updateCam(c, dt);
-  if (p.hidden && G.looked) p.camo = Math.max(0, p.camo - dt / 2.5); else if (!G.looked) p.camo = Math.min(1, p.camo + dt / 4);
+  if (p.hidden && G.looked) p.camo = Math.max(0, p.camo - dt / (p.ab === 'deepcamo' ? 6 : 2.5)); else if (!G.looked) p.camo = Math.min(1, p.camo + dt / 4);
 
   for (const b of G.bullets) {
     b.x += b.vx * dt; b.y += b.vy * dt; b.life -= dt;
@@ -585,6 +588,7 @@ function pathTo(g, x, y) {
 
 function alertGuard(g, silent) {
   if (g.dead || g.state === 'alert') return;
+  if (G.player.ab === 'trick' && !G.trickUsed && !G.over) { G.trickUsed = true; g.meter = 0.3; doSmoke('ILUSIÓN'); return; }
   g.state = 'alert'; g.meter = 1; g.reactT = g.react; g.fireCd = 0; g.lostT = 0;
   g.lastSeen = { x: G.player.x, y: G.player.y };
   if (!G.detected) { G.detected = true; updateHUD(); }
@@ -702,7 +706,7 @@ function updateCam(c, dt) {
   c.ang = c.base + Math.sin(c.phase) * 0.85;
   c.range = G.P.range * 1.1; c.fov = 50 * Math.PI / 180;
   const p = G.player;
-  const rawC = c.cool <= 0 && !G.over && G.grace <= 0 && p.smokeT <= 0 && canSee(c, p);
+  const rawC = c.cool <= 0 && !G.over && G.grace <= 0 && p.smokeT <= 0 && p.ab !== 'emp' && canSee(c, p);
   if (rawC) G.looked = true;
   const seen = rawC && !p.hidden;
   if (seen) c.meter = Math.min(1, c.meter + dt / (G.P.detTime * 0.9) * p.det);
@@ -723,6 +727,8 @@ function killGuard(g) {
   SFX.kill(); vibe(25); G.shake = 4;
   burst(g.x, g.y, 14, ['#ff3b4e', '#ff3b4e', '#ffffff']);
   if (g.boss) { G.shake = 10; vibe([60, 40, 120]); burst(g.x, g.y, 40, ['#ffd23a', '#ff3b4e', '#ffffff'], 340); G.banner = { txt: 'JEFE DERROTADO', sub: needsExit() ? '¡Ve a la salida!' : '', life: 2 }; }
+  if (G.player.ab === 'shadow') G.player.smokeT = Math.max(G.player.smokeT, 1.5);
+  if (G.player.ab === 'emp') G.player.camo = 1;
   G.combo = G.t - G.lastKill < 4 ? G.combo + 1 : 1; G.lastKill = G.t; G.hitstop = 0.06;
   const bonus = g.boss ? 30 : Math.min(2 + (G.combo - 1) * 2, 10);
   G.bonus += bonus;
@@ -770,13 +776,17 @@ function bossEscape(g) {
 }
 function useSmoke() {
   if (!G || !running || paused || G.over || G.smokes <= 0) return;
-  const p = G.player; G.smokes--; p.smokeT = 3; SFX.smoke(); vibe(30);
+  G.smokes--; doSmoke('HUMO');
+}
+function doSmoke(label) {
+  const p = G.player; p.smokeT = 3; SFX.smoke(); vibe(30);
   for (let i = 0; i < 40; i++) G.parts.push({ x: p.x + (Math.random() - 0.5) * 30, y: p.y + (Math.random() - 0.5) * 30, vx: (Math.random() - 0.5) * 90, vy: (Math.random() - 0.5) * 90, life: 1.2 + Math.random() * 0.8, c: 'rgba(190,200,215,0.3)', s: 12, grow: 34 });
   for (const g of G.guards) if (!g.dead && g.state === 'alert') { g.state = 'search'; g.searchT = 3; g.meter = 0.3; g.path = null; g.burstLeft = 0; g.windT = 0; g.chargeT = 0; floater(g.x, g.y - 30, '?', '#ffd23a'); }
-  floater(p.x, p.y - 30, 'HUMO', '#cfd8e3'); updateHUD();
+  floater(p.x, p.y - 30, label, '#cfd8e3'); updateHUD();
 }
 function hurt(n) {
   const p = G.player; if (p.inv > 0 || G.over) return;
+  if (p.shield > 0) { p.shield--; p.inv = 0.8; SFX.bossHit(); vibe(40); G.shake = 5; burst(p.x, p.y, 14, ['#ffd23a', '#ffffff'], 240); floater(p.x, p.y - 30, 'BLOQUEADO', '#ffd23a'); return; }
   p.hp -= n; p.inv = 0.6; G.shake = 6; SFX.hurt(); vibe(80);
   burst(p.x, p.y, 8, ['#ff3b4e'], 160);
   updateHUD();
@@ -1369,6 +1379,7 @@ function drawPlayer() {
   if (p.hidden || p.smokeT > 0) {
     ctx.strokeStyle = 'rgba(46,230,255,0.5)'; ctx.lineWidth = 1.5; ctx.setLineDash([3, 4]); ctx.beginPath(); ctx.arc(0, -4, 22, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
   }
+  if (p.shield > 0) { ctx.strokeStyle = `rgba(255,210,58,${0.6 + 0.3 * Math.sin(G.t * 5)})`; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(0, -4, 19, 0, Math.PI * 2); ctx.stroke(); }
   if (p.camo < 1) { ctx.strokeStyle = 'rgba(0,0,0,0.5)'; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(0, -4, 26, -2.2, -0.94); ctx.stroke(); ctx.strokeStyle = p.camo > 0.3 ? '#2ee6ff' : '#ff3b4e'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(0, -4, 26, -2.2, -2.2 + 1.26 * p.camo); ctx.stroke(); }
   if (p.hidden || p.smokeT > 0) ctx.globalAlpha = 0.4;
   ctx.scale(1.25, 1.25);
@@ -1739,5 +1750,5 @@ goMenu();
 requestAnimationFrame(loop);
 if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
 
-window.__UMBRA = { genLevel, missionFor, get G() { return G; }, startLevel, openBrief, play, update, get save() { return save; }, killGuard, hitBoss, finish, persist, goMenu, renderShop, show, set shopTab(v) { shopTab = v; } };
+window.__UMBRA = { genLevel, alertGuard, missionFor, get G() { return G; }, startLevel, openBrief, play, update, get save() { return save; }, killGuard, hitBoss, finish, persist, goMenu, renderShop, show, set shopTab(v) { shopTab = v; } };
 })();
