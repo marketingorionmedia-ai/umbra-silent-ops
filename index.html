@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>UMBRA // Silent Ops</title>
+<meta name="description" content="Juego de sigilo: muévete entre las sombras, evita los conos de visión y elimina a tus objetivos. 100 niveles.">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#07090d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta property="og:title" content="UMBRA // Silent Ops">
+<meta property="og:description" content="Muévete en las sombras. 100 misiones de sigilo.">
+<meta property="og:image" content="og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+:root{--bg:#07090d;--panel:rgba(12,16,24,.86);--line:rgba(255,255,255,.1);--txt:#e9eef5;--mut:#8a96a8;--cyan:#2ee6ff;--red:#ff3b4e;--gold:#ffd23a;--green:#37f59a}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden;overscroll-behavior:none;user-select:none;-webkit-user-select:none}
+canvas{position:fixed;inset:0;display:block;touch-action:none}
+.hidden{display:none!important}
+.screen{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:calc(20px + env(safe-area-inset-top)) 20px calc(20px + env(safe-area-inset-bottom));background:radial-gradient(ellipse at center,rgba(7,9,13,.55),rgba(7,9,13,.92));z-index:5;overflow-y:auto}
+.card{width:100%;max-width:420px;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:22px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.logo{font-weight:900;letter-spacing:.32em;font-size:46px;line-height:1;margin:0;text-align:center;background:linear-gradient(180deg,#fff,#7fdcff);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 0 40px rgba(46,230,255,.25);padding-left:.32em}
+.sub{text-align:center;color:var(--cyan);letter-spacing:.4em;font-size:12px;font-weight:700;margin:10px 0 4px;padding-left:.4em}
+.tag-line{text-align:center;color:var(--mut);font-size:13px;margin:0 0 26px}
+.btn{display:block;width:100%;border:0;border-radius:12px;padding:15px 16px;margin:10px 0;font:800 15px system-ui;letter-spacing:.12em;color:#04121a;background:linear-gradient(180deg,#5ff0ff,#1cc2e0);box-shadow:0 6px 24px rgba(46,230,255,.25);cursor:pointer}
+.btn:active{transform:translateY(1px)}
+.btn.ghost{background:rgba(255,255,255,.06);color:var(--txt);box-shadow:none;border:1px solid var(--line)}
+.btn.small{display:inline-block;width:auto;padding:9px 12px;margin:0;font-size:12px;min-width:92px}
+.btn:disabled{opacity:.35}
+.row{display:flex;gap:10px}.row .btn{flex:1}
+.coins{display:inline-flex;align-items:center;gap:6px;color:var(--gold);font-weight:800}
+.coins::before{content:"";width:12px;height:12px;border-radius:50%;background:var(--gold);box-shadow:inset -3px -3px 0 rgba(0,0,0,.2)}
+.top{display:flex;justify-content:space-between;align-items:center;width:100%;max-width:420px;margin-bottom:12px}
+.top h2{margin:0;font-size:16px;letter-spacing:.2em}
+.back{background:none;border:1px solid var(--line);color:var(--txt);border-radius:10px;padding:8px 12px;font:700 13px system-ui;cursor:pointer}
+#levels .scroll{width:100%;max-width:420px;overflow-y:auto;flex:1}
+#levels{justify-content:flex-start}
+.zone-h{display:flex;justify-content:space-between;font-size:12px;font-weight:800;letter-spacing:.14em;margin:18px 2px 8px}
+.lv-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.lv{aspect-ratio:1;border-radius:12px;border:1px solid color-mix(in srgb,var(--acc) 45%,transparent);background:color-mix(in srgb,var(--acc) 12%,#0b0f16);color:var(--txt);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;font-family:inherit}
+.lv b{font-size:17px}.lv i{font-style:normal;font-size:9px;color:var(--gold);letter-spacing:1px}
+.lv.boss{box-shadow:inset 0 0 0 2px var(--acc)}
+.lv.locked{opacity:.35;cursor:default}
+.shop-item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--line)}
+.shop-item small{display:block;color:var(--mut);font-size:12px;margin-top:3px}
+.skin-row{display:flex;align-items:center;gap:12px}
+.swatch{width:30px;height:30px;border-radius:50%;display:inline-block}
+.sec{font-size:11px;letter-spacing:.2em;color:var(--mut);margin:16px 0 0;font-weight:800}
+#hud{position:fixed;left:0;right:0;top:0;z-index:4;padding:calc(10px + env(safe-area-inset-top)) 12px 0;pointer-events:none}
+.hud-row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.hud-l{display:flex;flex-direction:column}
+#hud-level{font-weight:900;letter-spacing:.14em;font-size:15px}
+#hud-zone{font-size:10px;color:var(--mut);letter-spacing:.2em}
+#hud-hp span{color:#3a2228;font-size:18px;margin-left:1px}#hud-hp span.on{color:var(--red);text-shadow:0 0 8px rgba(255,59,78,.5)}
+.hud-r{display:flex;align-items:center;gap:10px}
+#btn-pause{pointer-events:auto;width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:rgba(12,16,24,.7);color:var(--txt);font-size:16px;cursor:pointer}
+.obj{margin-top:8px;display:flex;justify-content:space-between;align-items:center;gap:8px;background:rgba(12,16,24,.72);border:1px solid var(--line);border-radius:12px;padding:8px 12px;font-size:13px;font-weight:700}
+.tag{font-size:10px;font-weight:900;letter-spacing:.14em;padding:4px 8px;border-radius:8px;white-space:nowrap}
+.tag.good{background:rgba(55,245,154,.12);color:var(--green)}.tag.bad{background:rgba(255,59,78,.15);color:var(--red)}
+.brief-l{font-size:30px;font-weight:900;letter-spacing:.14em;text-align:center;margin:0}
+.brief-z{text-align:center;color:var(--cyan);font-size:11px;letter-spacing:.3em;font-weight:800;margin:6px 0 16px}
+.box{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:10px 0}
+.box small{display:block;color:var(--mut);font-size:10px;letter-spacing:.2em;font-weight:800;margin-bottom:4px}
+.tip{border-color:rgba(46,230,255,.35);background:rgba(46,230,255,.07);font-size:14px;line-height:1.4}
+.stars{text-align:center;font-size:34px;letter-spacing:6px;margin:6px 0}
+.star{color:#2a3240}.star.on{color:var(--gold);text-shadow:0 0 14px rgba(255,210,58,.5)}
+#result-title{text-align:center;font-weight:900;letter-spacing:.14em;font-size:24px;margin:4px 0;color:var(--green)}
+#result.lose #result-title{color:var(--red)}
+#result-detail{text-align:center;color:var(--txt);font-size:14px;line-height:1.8;margin:10px 0}
+#result-detail .off{color:var(--mut)}
+#result-coins{text-align:center;font-size:20px;font-weight:900;color:var(--gold);margin-bottom:6px}
+.foot{color:var(--mut);font-size:11px;text-align:center;margin-top:14px}
+@media (min-width:700px){.logo{font-size:64px}}
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<div id="hud" class="hidden">
+  <div class="hud-row">
+    <div class="hud-l"><span id="hud-level">NIVEL 1</span><span id="hud-zone">MUELLE</span></div>
+    <div class="hud-r"><span id="hud-hp"></span><span class="coins" id="hud-coins">0</span><button id="btn-pause" aria-label="Pausa">❚❚</button></div>
+  </div>
+  <div class="obj"><span id="hud-obj"></span><span id="hud-stealth" class="tag good">OCULTO</span></div>
+</div>
+
+<div id="menu" class="screen">
+  <div style="width:100%;max-width:420px">
+    <h1 class="logo">UMBRA</h1>
+    <div class="sub">SILENT OPS</div>
+    <p class="tag-line">Muévete en las sombras. 100 misiones.</p>
+    <button class="btn" id="btn-continue">JUGAR</button>
+    <div class="row"><button class="btn ghost" id="btn-levels">NIVELES</button><button class="btn ghost" id="btn-shop">ARSENAL</button></div>
+    <button class="btn ghost" id="btn-settings">AJUSTES</button>
+    <div class="foot"><span class="coins" id="menu-coins">0</span></div>
+  </div>
+</div>
+
+<div id="levels" class="screen hidden">
+  <div class="top"><button class="back" data-back>← Menú</button><h2>MISIONES</h2><span id="levels-stars" style="color:var(--gold);font-weight:800;font-size:13px"></span></div>
+  <div class="scroll"><div id="levels-grid"></div><div style="height:30px"></div></div>
+</div>
+
+<div id="shop" class="screen hidden">
+  <div class="top"><button class="back" data-back>← Menú</button><h2>ARSENAL</h2><span class="coins" id="shop-coins">0</span></div>
+  <div class="card" style="max-height:80vh;overflow-y:auto">
+    <div class="sec" style="margin-top:0">MEJORAS</div><div id="shop-upg"></div>
+    <div class="sec">TRAJES</div><div id="shop-skins"></div>
+  </div>
+</div>
+
+<div id="settings" class="screen hidden">
+  <div class="top"><button class="back" data-back>← Menú</button><h2>AJUSTES</h2><span></span></div>
+  <div class="card">
+    <button class="btn ghost" id="set-sound">SONIDO</button>
+    <button class="btn ghost" id="set-vib">VIBRACIÓN</button>
+    <button class="btn ghost" id="set-reset" style="color:var(--red)">BORRAR PROGRESO</button>
+    <div class="foot">Tu progreso se guarda en este dispositivo.<br>Controles: arrastra el dedo · en PC usa WASD o flechas · Esc = pausa</div>
+  </div>
+</div>
+
+<div id="brief" class="screen hidden">
+  <div class="card">
+    <p class="brief-l" id="brief-level">NIVEL 1</p>
+    <div class="brief-z" id="brief-zone">MUELLE</div>
+    <div class="stars" id="brief-stars"></div>
+    <div class="box"><small>OBJETIVO</small><div id="brief-obj" style="font-weight:800"></div></div>
+    <div class="box"><small>INTELIGENCIA</small><div id="brief-enemies" style="font-size:14px"></div></div>
+    <div class="box tip" id="brief-tip"></div>
+    <button class="btn" id="btn-play">INICIAR MISIÓN</button>
+    <button class="btn ghost" id="btn-brief-back">VOLVER</button>
+  </div>
+</div>
+
+<div id="pause" class="screen hidden">
+  <div class="card">
+    <p class="brief-l">PAUSA</p><div style="height:14px"></div>
+    <button class="btn" id="btn-resume">CONTINUAR</button>
+    <button class="btn ghost" id="btn-restart">REINICIAR NIVEL</button>
+    <button class="btn ghost" id="btn-quit">SALIR AL MENÚ</button>
+  </div>
+</div>
+
+<div id="result" class="screen hidden">
+  <div class="card">
+    <div id="result-title">MISIÓN CUMPLIDA</div>
+    <div class="stars" id="result-stars"></div>
+    <div id="result-detail"></div>
+    <div id="result-coins"></div>
+    <button class="btn" id="btn-next">SIGUIENTE NIVEL</button>
+    <div class="row"><button class="btn ghost" id="btn-retry">REPETIR</button><button class="btn ghost" id="btn-res-menu">MENÚ</button></div>
+  </div>
+</div>
+
+<script src="game.js"></script>
+</body>
+</html>
