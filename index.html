@@ -115,6 +115,18 @@ canvas{display:block}
 #result-hint{text-align:center;color:var(--cyan);font-size:13px;min-height:16px;margin-bottom:6px}
 .steps{margin:0;padding-left:20px;line-height:1.6;font-size:15px}
 .steps b{color:var(--cyan)}
+.wrow{display:flex;gap:6px}
+.chip{flex:1;min-width:0;border:1px solid var(--line);background:rgba(255,255,255,.04);border-radius:10px;padding:4px 0 5px;color:var(--txt);display:flex;flex-direction:column;align-items:center;cursor:pointer;font-family:inherit}
+.chip canvas{max-width:100%}
+.chip i{font-style:normal;font-size:9px;font-weight:800;letter-spacing:.04em;white-space:nowrap}
+.chip.on{border-color:var(--cyan);background:rgba(46,230,255,.14)}.chip.on i{color:var(--cyan)}
+.chip.no{opacity:.4}
+.chip .coins::before{width:8px;height:8px}
+.toast{width:100%;border:1px solid rgba(255,210,58,.5);background:rgba(255,210,58,.12);color:var(--txt);border-radius:12px;padding:10px;font:500 13px system-ui;line-height:1.4;cursor:pointer;margin-bottom:4px;animation:pulse 1.6s infinite}
+.toast b{color:var(--gold)}
+@keyframes pulse{50%{transform:scale(1.02)}}
+.btn.has{position:relative}.btn.has::after{content:"";position:absolute;top:8px;right:10px;width:10px;height:10px;border-radius:50%;background:var(--red);box-shadow:0 0 8px var(--red)}
+#brief .card{padding:16px}#brief .box{margin:8px 0;padding:10px 12px}#brief .stars{font-size:26px;margin:0}#brief .brief-z{margin:4px 0 6px}
 @media (min-width:700px){.logo{font-size:64px}}
 </style>
 </head>
@@ -137,6 +149,7 @@ canvas{display:block}
     <div class="sub">SILENT OPS</div>
     <canvas id="hero" width="200" height="190" aria-label="Tu personaje"></canvas>
     <div id="hero-name"></div>
+    <button class="toast hidden" id="toast">🎁 <b>+350 monedas de regalo</b><br>Toca aquí y compra tu primera arma</button>
     <button class="btn big" id="btn-continue">JUGAR</button>
     <div class="row" style="width:100%"><button class="btn ghost" id="btn-levels">MISIONES</button><button class="btn ghost" id="btn-shop">ARSENAL</button></div>
     <div class="row" style="width:100%"><button class="btn install" id="btn-install">📲 INSTALAR APP</button><button class="btn ghost" id="btn-settings" style="flex:.4">⚙</button></div>
@@ -171,9 +184,9 @@ canvas{display:block}
     <p class="brief-l" id="brief-level">NIVEL 1</p>
     <div class="brief-z" id="brief-zone">MUELLE</div>
     <div class="stars" id="brief-stars"></div>
-    <div class="box"><small>OBJETIVO</small><div id="brief-obj" style="font-weight:800"></div></div>
+    <div class="box"><small>OBJETIVO</small><div id="brief-obj" style="font-weight:800"></div><div id="brief-enemies" style="font-size:13px;color:var(--mut);margin-top:3px"></div></div>
     <div class="box boss-box hidden" id="brief-boss"><canvas id="brief-boss-c"></canvas><div><small>JEFE</small><b id="brief-boss-name"></b><div id="brief-boss-title" style="font-size:13px;color:var(--mut)"></div><div class="hp" id="brief-boss-hp"></div></div></div>
-    <div class="box"><small>INTELIGENCIA</small><div id="brief-enemies" style="font-size:14px"></div></div>
+    <div class="box"><small style="display:flex;justify-content:space-between"><span>ELIGE TU ARMA</span><span class="coins" id="brief-coins" style="letter-spacing:0">0</span></small><div id="brief-weapons" class="wrow"></div><div id="brief-wdesc" style="font-size:12px;color:var(--mut);margin-top:6px"></div></div>
     <div class="box tip" id="brief-tip"></div>
     <button class="btn" id="btn-play">INICIAR MISIÓN</button>
     <button class="btn ghost" id="btn-brief-back">VOLVER</button>
