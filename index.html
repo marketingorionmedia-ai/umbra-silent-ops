@@ -21,7 +21,8 @@
 :root{--bg:#07090d;--panel:rgba(12,16,24,.86);--line:rgba(255,255,255,.1);--txt:#e9eef5;--mut:#8a96a8;--cyan:#2ee6ff;--red:#ff3b4e;--gold:#ffd23a;--green:#37f59a}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden;overscroll-behavior:none;user-select:none;-webkit-user-select:none}
-canvas{position:fixed;inset:0;display:block;touch-action:none}
+#game{position:fixed;inset:0;display:block;touch-action:none}
+canvas{display:block}
 .hidden{display:none!important}
 .screen{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:calc(20px + env(safe-area-inset-top)) 20px calc(20px + env(safe-area-inset-bottom));background:radial-gradient(ellipse at center,rgba(7,9,13,.55),rgba(7,9,13,.92));z-index:5;overflow-y:auto}
 .card{width:100%;max-width:420px;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:22px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
@@ -76,6 +77,44 @@ canvas{position:fixed;inset:0;display:block;touch-action:none}
 #result-detail .off{color:var(--mut)}
 #result-coins{text-align:center;font-size:20px;font-weight:900;color:var(--gold);margin-bottom:6px}
 .foot{color:var(--mut);font-size:11px;text-align:center;margin-top:14px}
+
+.menu-wrap{width:100%;max-width:420px;display:flex;flex-direction:column;align-items:center}
+.menu-top{display:flex;justify-content:space-between;width:100%;margin-bottom:6px;font-weight:800}
+.pill{background:rgba(12,16,24,.8);border:1px solid var(--line);border-radius:20px;padding:7px 12px;font-size:13px}
+#menu-stars{color:var(--gold)}
+#hero{cursor:pointer;margin:6px 0 0;filter:drop-shadow(0 10px 30px rgba(0,0,0,.6))}
+#hero-name{font-size:13px;color:var(--mut);margin-bottom:12px;letter-spacing:.06em}
+.btn.big{font-size:20px;padding:18px;border-radius:16px}
+.btn small{display:block;font-size:11px;letter-spacing:.2em;opacity:.75;margin-top:2px}
+.btn.install{background:linear-gradient(180deg,#ffe36b,#ffb81c);color:#231700;box-shadow:0 6px 24px rgba(255,200,40,.25)}
+.lv{position:relative}
+.lv em{position:absolute;top:3px;left:0;right:0;font-style:normal;font-size:8px;font-weight:900;letter-spacing:.12em;color:#ff3b4e}
+.tabs{display:flex;gap:6px;margin-bottom:12px}
+.tab{flex:1;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--mut);border-radius:10px;padding:10px 4px;font:800 12px system-ui;letter-spacing:.1em;cursor:pointer}
+.tab.on{background:rgba(46,230,255,.14);color:var(--cyan);border-color:rgba(46,230,255,.4)}
+.char-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.char-card{border:1px solid var(--line);border-radius:14px;padding:6px 8px 10px;text-align:center;background:linear-gradient(180deg,color-mix(in srgb,var(--acc) 14%,transparent),rgba(255,255,255,.02));display:flex;flex-direction:column;align-items:center}
+.char-card.eq{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc) inset}
+.char-card b{font-size:15px;letter-spacing:.14em;color:var(--acc)}
+.char-card small{color:var(--mut);font-size:11px}
+.char-card .perk{font-size:11px;min-height:30px;margin:4px 0 8px;line-height:1.3}
+.char-card .btn{width:100%}
+.shop-item.eq b{color:var(--cyan)}
+.grow{flex:1}
+.wicon{flex:none}
+.pips{display:block;color:var(--cyan);font-size:11px;letter-spacing:2px;margin-top:3px}
+.coins.dark{color:#04121a}.coins.dark::before{background:#04121a}
+.btn:disabled .coins.dark{color:inherit}
+.boss-bar{margin-top:8px;background:rgba(40,8,14,.85);border:1px solid rgba(255,59,78,.45);border-radius:12px;padding:7px 12px}
+.boss-bar .bt{display:flex;justify-content:space-between;font-size:11px;font-weight:900;letter-spacing:.14em;color:#ffb3bc;margin-bottom:5px}
+.boss-bar .bar{height:8px;background:rgba(255,255,255,.08);border-radius:6px;overflow:hidden}
+.boss-bar .bar i{display:block;height:100%;background:linear-gradient(90deg,#ff3b4e,#ff8a2e);transition:width .3s}
+.boss-box{display:flex;gap:12px;align-items:center;border-color:rgba(255,59,78,.45);background:rgba(255,59,78,.08)}
+.boss-box b{font-size:17px;letter-spacing:.1em;color:#ff6b78}
+.boss-box .hp{color:var(--red);letter-spacing:2px;font-size:13px}
+#result-hint{text-align:center;color:var(--cyan);font-size:13px;min-height:16px;margin-bottom:6px}
+.steps{margin:0;padding-left:20px;line-height:1.6;font-size:15px}
+.steps b{color:var(--cyan)}
 @media (min-width:700px){.logo{font-size:64px}}
 </style>
 </head>
@@ -88,17 +127,19 @@ canvas{position:fixed;inset:0;display:block;touch-action:none}
     <div class="hud-r"><span id="hud-hp"></span><span class="coins" id="hud-coins">0</span><button id="btn-pause" aria-label="Pausa">❚❚</button></div>
   </div>
   <div class="obj"><span id="hud-obj"></span><span id="hud-stealth" class="tag good">OCULTO</span></div>
+  <div id="hud-boss" class="boss-bar hidden"><div class="bt"><span>JEFE · <span id="hud-boss-name"></span></span><span id="hud-boss-hp"></span></div><div class="bar"><i id="hud-boss-fill"></i></div></div>
 </div>
 
 <div id="menu" class="screen">
-  <div style="width:100%;max-width:420px">
+  <div class="menu-wrap">
+    <div class="menu-top"><span class="pill"><span class="coins" id="menu-coins">0</span></span><span class="pill" id="menu-stars">★ 0</span></div>
     <h1 class="logo">UMBRA</h1>
     <div class="sub">SILENT OPS</div>
-    <p class="tag-line">Muévete en las sombras. 100 misiones.</p>
-    <button class="btn" id="btn-continue">JUGAR</button>
-    <div class="row"><button class="btn ghost" id="btn-levels">NIVELES</button><button class="btn ghost" id="btn-shop">ARSENAL</button></div>
-    <button class="btn ghost" id="btn-settings">AJUSTES</button>
-    <div class="foot"><span class="coins" id="menu-coins">0</span></div>
+    <canvas id="hero" width="200" height="190" aria-label="Tu personaje"></canvas>
+    <div id="hero-name"></div>
+    <button class="btn big" id="btn-continue">JUGAR</button>
+    <div class="row" style="width:100%"><button class="btn ghost" id="btn-levels">MISIONES</button><button class="btn ghost" id="btn-shop">ARSENAL</button></div>
+    <div class="row" style="width:100%"><button class="btn install" id="btn-install">📲 INSTALAR APP</button><button class="btn ghost" id="btn-settings" style="flex:.4">⚙</button></div>
   </div>
 </div>
 
@@ -109,9 +150,9 @@ canvas{position:fixed;inset:0;display:block;touch-action:none}
 
 <div id="shop" class="screen hidden">
   <div class="top"><button class="back" data-back>← Menú</button><h2>ARSENAL</h2><span class="coins" id="shop-coins">0</span></div>
-  <div class="card" style="max-height:80vh;overflow-y:auto">
-    <div class="sec" style="margin-top:0">MEJORAS</div><div id="shop-upg"></div>
-    <div class="sec">TRAJES</div><div id="shop-skins"></div>
+  <div class="card" style="max-height:82vh;overflow-y:auto;padding:16px">
+    <div class="tabs"><button class="tab" data-tab="chars">PERSONAJES</button><button class="tab" data-tab="weapons">ARMAS</button><button class="tab" data-tab="upg">MEJORAS</button></div>
+    <div id="shop-body"></div>
   </div>
 </div>
 
@@ -131,6 +172,7 @@ canvas{position:fixed;inset:0;display:block;touch-action:none}
     <div class="brief-z" id="brief-zone">MUELLE</div>
     <div class="stars" id="brief-stars"></div>
     <div class="box"><small>OBJETIVO</small><div id="brief-obj" style="font-weight:800"></div></div>
+    <div class="box boss-box hidden" id="brief-boss"><canvas id="brief-boss-c"></canvas><div><small>JEFE</small><b id="brief-boss-name"></b><div id="brief-boss-title" style="font-size:13px;color:var(--mut)"></div><div class="hp" id="brief-boss-hp"></div></div></div>
     <div class="box"><small>INTELIGENCIA</small><div id="brief-enemies" style="font-size:14px"></div></div>
     <div class="box tip" id="brief-tip"></div>
     <button class="btn" id="btn-play">INICIAR MISIÓN</button>
@@ -153,8 +195,35 @@ canvas{position:fixed;inset:0;display:block;touch-action:none}
     <div class="stars" id="result-stars"></div>
     <div id="result-detail"></div>
     <div id="result-coins"></div>
+    <div id="result-hint"></div>
     <button class="btn" id="btn-next">SIGUIENTE NIVEL</button>
-    <div class="row"><button class="btn ghost" id="btn-retry">REPETIR</button><button class="btn ghost" id="btn-res-menu">MENÚ</button></div>
+    <div class="row"><button class="btn ghost" id="btn-retry">REPETIR</button><button class="btn ghost" id="btn-res-shop">ARSENAL</button><button class="btn ghost" id="btn-res-menu">MENÚ</button></div>
+  </div>
+</div>
+
+<div id="install" class="screen hidden">
+  <div class="card">
+    <p class="brief-l" style="font-size:22px">INSTALAR UMBRA</p>
+    <div class="brief-z">COMO APP EN TU CELULAR</div>
+    <div id="inst-ios" class="box">
+      <small>IPHONE / IPAD</small>
+      <ol class="steps">
+        <li>Abre este link en <b>Safari</b>.</li>
+        <li>Toca <b>Compartir</b> (el cuadro con la flecha ↑).</li>
+        <li>Elige <b>Agregar a inicio</b> y luego <b>Agregar</b>.</li>
+        <li>Abre UMBRA desde tu pantalla de inicio: se verá a pantalla completa.</li>
+      </ol>
+    </div>
+    <div id="inst-android" class="box">
+      <small>ANDROID</small>
+      <ol class="steps">
+        <li>Abre este link en <b>Chrome</b>.</li>
+        <li>Toca el menú <b>⋮</b> (arriba a la derecha).</li>
+        <li>Elige <b>Instalar app</b> o <b>Agregar a la pantalla principal</b>.</li>
+        <li>Abre UMBRA desde tus apps: se verá a pantalla completa.</li>
+      </ol>
+    </div>
+    <button class="btn" data-back>ENTENDIDO</button>
   </div>
 </div>
 
