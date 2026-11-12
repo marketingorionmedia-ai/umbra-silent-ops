@@ -280,6 +280,7 @@ function loadSave() {
   catch (e) { save = JSON.parse(JSON.stringify(DEFAULT_SAVE)); }
   save.upg = Object.assign({ hp: 0, spd: 0, reach: 0 }, save.upg);
   if (!Array.isArray(save.chars)) save.chars = ['kaze'];
+  if (!save.clv || typeof save.clv !== 'object') save.clv = {};
   if (!Array.isArray(save.weapons)) save.weapons = ['katana'];
   if (!CHARS.some(c => c.id === save.char)) save.char = 'kaze';
   if (!WEAPONS.some(w => w.id === save.weapon)) save.weapon = 'katana';
@@ -287,6 +288,10 @@ function loadSave() {
   if (!save.gift) { save.gift = true; save.coins += 350; giftPending = true; persist(); }
 }
 function persist() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) {} }
+const MAX_CLV = 5;
+const clvOf = id => Math.min(MAX_CLV, (save.clv && save.clv[id]) || 1);
+const clvCost = c => Math.round((150 + c.price * 0.25) * clvOf(c.id) / 10) * 10;
+const clvNext = l => (l + 1 === 3 || l + 1 === 5) ? '+1 corazón' : '+velocidad y sigilo';
 const charOf = () => CHARS.find(c => c.id === save.char) || CHARS[0];
 const weaponOf = () => WEAPONS.find(w => w.id === save.weapon) || WEAPONS[0];
 
@@ -366,12 +371,12 @@ function moveCircle(e, dx, dy) {
 const ctr = t => ({ x: t.x * T + T / 2, y: t.y * T + T / 2 });
 
 function playerStats() {
-  const c = charOf(), w = weaponOf();
+  const c = charOf(), w = weaponOf(), lv = clvOf(c.id);
   return {
-    hpMax: 3 + save.upg.hp + (c.hp || 0),
-    spd: 118 * (1 + 0.08 * save.upg.spd + (c.spd || 0) + (w.spd || 0)),
-    reach: 14 + save.upg.reach * 4 + (w.reach || 0),
-    det: c.det || 1, coin: c.coin || 0, pierce: !!w.pierce, bossDmg: w.bossDmg || 1, ranged: !!w.ranged,
+    hpMax: 3 + save.upg.hp + (c.hp || 0) + (lv >= 3 ? 1 : 0) + (lv >= 5 ? 1 : 0),
+    spd: 118 * (1 + 0.08 * save.upg.spd + (c.spd || 0) + (w.spd || 0) + 0.04 * (lv - 1)),
+    reach: 14 + save.upg.reach * 4 + (w.reach || 0) + (lv - 1),
+    det: (c.det || 1) * (1 - 0.04 * (lv - 1)), coin: c.coin || 0, pierce: !!w.pierce, bossDmg: w.bossDmg || 1, ranged: !!w.ranged,
   };
 }
 
@@ -1445,8 +1450,8 @@ function goMenu() {
   const ch = charOf(), w = weaponOf();
   const x = prepCanvas($('#hero'), 200, 190);
   drawPortrait(x, ch, w, 100, 76, 56);
-  $('#hero-name').innerHTML = `<b style="color:${ch.band}">${ch.name}</b> · ${ch.role} · ${w.name}`;
-  const can = [...CHARS.filter(c => !save.chars.includes(c.id)), ...WEAPONS.filter(w => !save.weapons.includes(w.id))].some(i => i.price <= save.coins);
+  $('#hero-name').innerHTML = `<b style="color:${ch.band}">${ch.name}</b> · ${ch.role} · ${w.name}<br><span class="clv">NV ${clvOf(ch.id)} <i>${'★'.repeat(clvOf(ch.id))}${'☆'.repeat(MAX_CLV - clvOf(ch.id))}</i></span>`;
+  const can = [...CHARS.filter(c => !save.chars.includes(c.id)), ...WEAPONS.filter(w => !save.weapons.includes(w.id))].some(i => i.price <= save.coins) || CHARS.some(c => save.chars.includes(c.id) && clvOf(c.id) < MAX_CLV && clvCost(c) <= save.coins);
   $('#btn-shop').classList.toggle('has', can);
   $('#toast').classList.toggle('hidden', !giftPending);
   updateInstallBtn();
@@ -1573,11 +1578,19 @@ function renderShop() {
       const cvs = document.createElement('canvas'); d.appendChild(cvs);
       const x = prepCanvas(cvs, 130, 118); drawPortrait(x, c, weaponOf(), 65, 46, 33);
       d.insertAdjacentHTML('beforeend', `<b>${c.name}</b><small>${c.role}</small><span class="perk">${c.perk}</span>`);
+      if (own) { const l = clvOf(c.id); d.insertAdjacentHTML('beforeend', `<span class="clv">NV ${l} <i>${'★'.repeat(l)}${'☆'.repeat(MAX_CLV - l)}</i></span>`); }
       const b = document.createElement('button'); b.className = 'btn small' + (eq ? ' ghost' : '');
       if (eq) { b.textContent = 'EN USO'; b.disabled = true; }
       else if (own) { b.textContent = 'USAR'; b.onclick = () => { save.char = c.id; persist(); renderShop(); }; }
       else { b.innerHTML = `<span class="coins dark">${c.price}</span>`; b.disabled = save.coins < c.price; b.onclick = () => buy(c.price, () => { save.chars.push(c.id); save.char = c.id; }); }
-      d.appendChild(b); grid.appendChild(d);
+      d.appendChild(b);
+      if (own) {
+        const l = clvOf(c.id), u = document.createElement('button'); u.className = 'btn small up';
+        if (l >= MAX_CLV) { u.textContent = 'NIVEL MÁXIMO'; u.disabled = true; }
+        else { const cost = clvCost(c); u.innerHTML = `▲ NV ${l + 1} · <span class="coins dark">${cost}</span><small>${clvNext(l)}</small>`; u.disabled = save.coins < cost; u.onclick = () => buy(cost, () => { save.clv[c.id] = l + 1; }); }
+        d.appendChild(u);
+      }
+      grid.appendChild(d);
     }
     box.appendChild(grid);
   } else if (shopTab === 'weapons') {
@@ -1653,6 +1666,8 @@ function bind() {
   $('#btn-play').onclick = play;
   $('#btn-brief-back').onclick = () => { G = null; renderLevels(); show('levels'); };
   $('#btn-pause').onclick = togglePause;
+  $('#hud-objbox').classList.toggle('min', !!save.objMin);
+  $('#hud-objbox').onclick = () => { save.objMin = !save.objMin; persist(); $('#hud-objbox').classList.toggle('min', save.objMin); };
   $('#btn-resume').onclick = togglePause;
   $('#btn-restart').onclick = () => openBrief(G.L);
   $('#btn-quit').onclick = goMenu;
@@ -1664,7 +1679,7 @@ function bind() {
   $('#set-vib').onclick = () => { save.vib = !save.vib; persist(); renderSettings(); };
   $('#set-reset').onclick = () => {
     if (!resetArm) { resetArm = true; $('#set-reset').textContent = '¿SEGURO? TOCA OTRA VEZ'; return; }
-    save = JSON.parse(JSON.stringify(DEFAULT_SAVE)); persist(); renderSettings(); $('#set-reset').textContent = 'PROGRESO BORRADO';
+    save = JSON.parse(JSON.stringify(DEFAULT_SAVE)); save.clv = {}; persist(); renderSettings(); $('#set-reset').textContent = 'PROGRESO BORRADO';
   };
 }
 

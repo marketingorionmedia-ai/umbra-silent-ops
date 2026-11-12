@@ -127,6 +127,18 @@ canvas{display:block}
 @keyframes pulse{50%{transform:scale(1.02)}}
 .btn.has{position:relative}.btn.has::after{content:"";position:absolute;top:8px;right:10px;width:10px;height:10px;border-radius:50%;background:var(--red);box-shadow:0 0 8px var(--red)}
 #brief .card{padding:16px}#brief .box{margin:8px 0;padding:10px 12px}#brief .stars{font-size:26px;margin:0}#brief .brief-z{margin:4px 0 6px}
+.clv{font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--txt)}.clv i{font-style:normal;color:var(--gold);letter-spacing:1px}
+.char-card .clv{margin-bottom:6px}
+.btn.up{background:linear-gradient(180deg,#ffe36b,#ffb81c);color:#231700;box-shadow:none;margin-top:6px;font-size:11px;letter-spacing:.04em;padding:7px 4px}
+.btn.up small{font-size:9px;letter-spacing:.02em;margin-top:1px}
+.btn.up .coins.dark{color:#231700}.btn.up .coins.dark::before{background:#231700;width:8px;height:8px}
+#hero-name{text-align:center;line-height:1.6}
+.obj{pointer-events:auto;cursor:pointer}
+.obj #hud-obj{flex:1}
+.obj .lbl{display:none;font-size:10px;letter-spacing:.16em;color:var(--mut);font-weight:900}
+.obj .chev{color:var(--mut);font-size:11px}
+.obj.min{display:inline-flex;padding:6px 10px}
+.obj.min #hud-obj{display:none}.obj.min .lbl{display:inline}.obj.min .chev{transform:rotate(180deg)}
 @media (min-width:700px){.logo{font-size:64px}}
 </style>
 </head>
@@ -138,7 +150,7 @@ canvas{display:block}
     <div class="hud-l"><span id="hud-level">NIVEL 1</span><span id="hud-zone">MUELLE</span></div>
     <div class="hud-r"><span id="hud-hp"></span><span class="coins" id="hud-coins">0</span><button id="btn-pause" aria-label="Pausa">❚❚</button></div>
   </div>
-  <div class="obj"><span id="hud-obj"></span><span id="hud-stealth" class="tag good">OCULTO</span></div>
+  <div class="obj" id="hud-objbox"><span class="lbl">MISIÓN</span><span id="hud-obj"></span><span id="hud-stealth" class="tag good">OCULTO</span><span class="chev">▴</span></div>
   <div id="hud-boss" class="boss-bar hidden"><div class="bt"><span>JEFE · <span id="hud-boss-name"></span></span><span id="hud-boss-hp"></span></div><div class="bar"><i id="hud-boss-fill"></i></div></div>
 </div>
 
